@@ -1,0 +1,16 @@
+[package]
+name = "shuttlegame-leaderboard"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.6.18", features = ["macros", "ws"] }
+futures = "0.3.28"
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.107"
+shuttle-axum = "0.26.0"
+shuttle-runtime = "0.26.0"
+shuttle-shared-db = { version = "0.26.0", features = ["postgres"] }
+sqlx = { version = "0.7.1", features = ["postgres", "runtime-tokio-native-tls"] }
+tokio = "1.28.2"
+tokio-stream = { version = "0.1.14", features = ["sync"] }
