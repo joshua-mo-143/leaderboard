@@ -2,10 +2,7 @@
 {% block content %}
 <h1>Shuttle Invaders Leaderboard</h1>
 <div id="playerscores-container">
-<div>
-<p>name</p>
-<p>score</p>
-</div>
+<p> Looks like nobody's submitted a score yet :(</p>
 </div>
 
 <script>
@@ -13,16 +10,25 @@ try {
 const websocket = new WebSocket("ws://localhost:8000/ws");
 
 websocket.onmessage = (event) => {
-  let message = JSON.parse(event.data);
-  console.log("Received some data: ", message);
-  let div = document.createElement("p");
-  div.innerText = message['name'] + " - " + message['score'];
-  let meme = document.querySelector("#playerscores-container");
-  meme.append(div);
-  
+  let event_data = JSON.parse(event.data);
+  console.log("Received some data: ", event_data);
+  redrawScores(event_data);
 };
 } catch(e) {
 	console.log(e.message)
+}
+
+function redrawScores(array) {
+	let elems = array.map((x, i) => {
+	let meme = document.createElement("div");
+	meme.classList.toggle("playerscore-container");
+	meme.innerText = (i + 1) + ". " + x.score + " - " + x.name;
+	
+	return meme
+	});
+
+let meme = document.querySelector("#playerscores-container");
+meme.replaceChildren(...elems);
 }
 
 </script>

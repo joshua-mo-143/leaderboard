@@ -29,9 +29,9 @@ pub async fn handle_socket(mut socket: WebSocket, rx: ScoreReceiver) {
             vec.pop();
         }
         vec.push(message.clone());
-        vec.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
+        vec.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
         println!("Received score: {:?}", message);
-        let message = Message::Text(json!(message).to_string());
+        let message = Message::Text(json!(vec).to_string());
         if socket.send(message).await.is_err() {
             println!("Client error while sending");
             // client disconnected
