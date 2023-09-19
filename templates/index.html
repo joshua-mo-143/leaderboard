@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Shuttle Invaders Leaderboard</h1>
+<div id="playerscores-container">
+<div>
+<p>name</p>
+<p>score</p>
+</div>
+</div>
+
+<script>
+try {
+const websocket = new WebSocket("ws://localhost:8000/ws");
+
+websocket.onmessage = (event) => {
+  let message = JSON.parse(event.data);
+  console.log("Received some data: ", message);
+  let div = document.createElement("p");
+  div.innerText = message['name'] + " - " + message['score'];
+  let meme = document.querySelector("#playerscores-container");
+  meme.append(div);
+  
+};
+} catch(e) {
+	console.log(e.message)
+}
+
+</script>
+{% endblock content %}

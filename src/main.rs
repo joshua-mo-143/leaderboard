@@ -1,66 +1,53 @@
+use axum::{
+    routing::{get, post},
+    Extension, Router,
+};
+use std::path::PathBuf;
+use std::sync::Arc;
+use tera::Tera;
 use tokio::sync::watch::{channel, Sender};
 use tokio::sync::Mutex;
-use std::sync::Arc;
-use axum::{
-extract::ws::{WebSocketUpgrade, WebSocket, Message},	
-    http::StatusCode,
-    routing::{get, post},
-    Extension, Json, Router,
-    response::{Response},
-};
-use serde::Deserialize;
-use tokio_stream::{StreamExt as _, wrappers::WatchStream};
+use tokio_stream::wrappers::WatchStream;
 
-type ScoreReceiver = Arc<Mutex<WatchStream<PlayerScore>>>;
-type ScoreSender = Arc<Mutex<Sender<PlayerScore>>>;
-async fn hello_world() -> &'static str {
-    "Hello, world!"
-}
+use frontend::index;
+use websocket::{post_score, socket_handler, PlayerScore};
+mod frontend;
+mod websocket;
+
+pub type ScoreReceiver = Arc<Mutex<WatchStream<PlayerScore>>>;
+pub type ScoreSender = Arc<Mutex<Sender<PlayerScore>>>;
 
 #[shuttle_runtime::main]
-async fn axum() -> shuttle_axum::ShuttleAxum {
-	let score = PlayerScore::default();
+async fn axum(
+    #[shuttle_static_folder::StaticFolder(folder = "templates")] templates: PathBuf,
+) -> shuttle_axum::ShuttleAxum {
+    let tera = init_tera(templates);
+
+    let score = PlayerScore::default();
     let (tx, rx) = channel(score);
-	let rx = Arc::new(Mutex::new(WatchStream::from_changes(rx)));
-	let tx = Arc::new(Mutex::new(tx));
+    let rx = Arc::new(Mutex::new(WatchStream::from_changes(rx)));
+    let tx = Arc::new(Mutex::new(tx));
 
     let router = Router::new()
-        .route("/", get(hello_world))
-        .route("/post_score", post(post_score))
-	.route("/ws", get(handler))
-	.layer(Extension(tx))
-	.layer(Extension(rx));
-
+        .route("/", get(index))
+        .route("/submit", post(post_score))
+        .route("/ws", get(socket_handler))
+        .layer(Extension(tx))
+        .layer(Extension(rx))
+        .layer(Extension(Arc::new(tera)));
 
     Ok(router.into())
 }
 
-#[derive(Deserialize, Default, Clone)]
-struct PlayerScore {
-    score: u32,
-    name: String,
-}
+pub fn init_tera(templates: PathBuf) -> Tera {
+    let tera = format!("{}/**/*", templates.display());
 
-#[axum::debug_handler]
-async fn post_score(
-	Extension(tx): Extension<ScoreSender>,
-    Json(submission): Json<PlayerScore>,
-) -> StatusCode {
-	tx.lock().await.send(submission).unwrap();
+    let mut tera = Tera::new(&tera).unwrap();
+    tera.add_template_files(vec![
+        (templates.join("base.html"), Some("base")),
+        (templates.join("index.html"), Some("index")),
+    ])
+    .unwrap();
 
-    StatusCode::OK
-}
-
-async fn handler(ws: WebSocketUpgrade, Extension(rx): Extension<ScoreReceiver>) -> Response {
-    ws.on_upgrade(|socket| handle_socket(socket, rx))
-}
-
-async fn handle_socket(mut socket: WebSocket, rx: ScoreReceiver) {
- 	while let Some(_message) = rx.lock().await.next().await {
-	let message = Message::Text("Hello world".to_string());
-        if socket.send(message).await.is_err() {
-            // client disconnected
-            return;
-        }
-    }
+    tera
 }
