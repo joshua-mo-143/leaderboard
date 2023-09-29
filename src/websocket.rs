@@ -21,10 +21,13 @@ pub struct PlayerScore {
 
 pub async fn get_scores(
     Extension(persist): Extension<PersistInstance>,	
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, StatusCode> {
     let scores = load_persist(persist);
 
-    (StatusCode::OK, Json(scores))
+    if  scores.len() == 0  {
+	return Err(StatusCode::NO_CONTENT)
+}
+    Ok((StatusCode::OK, Json(scores)))
 }
 
 pub async fn post_score(

@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Shuttle Invaders Leaderboard</h1>
-<div id="playerscores-container">
-<p> Looks like nobody's submitted a score yet :(</p>
+<div class="page-wrapper"> 
+	<h1>Shuttle Invaders Leaderboard</h1>
+	<div id="playerscores-container">
+		<p>Loading...</p>
+	</div>
+	<div>
+		<h2> Information </h2>
+	<p> Shuttle Invaders is a game where you get to play as a spaceship and shoot unwraps and errors away.</p>
+	
+	<p> Interested in getting to know us more? </p>
+	<p><a href="https://www.github.com/shuttle-hq/shuttle" target="_blank">Give us a star on GitHub!</a></p>
+	<p><a href="https://www.twitter.com/shuttle_dev" target="_blank"> Follow us on Twitter for updates on releases! </a></p>
+	</div>
 </div>
 
 <script>
@@ -47,6 +57,5 @@ function redrawScores(array) {
 let meme = document.querySelector("#playerscores-container");
 meme.replaceChildren(...elems);
 }
-
 </script>
 {% endblock content %}

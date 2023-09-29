@@ -7,7 +7,7 @@ use tera::Tera;
 use tokio::sync::broadcast::{channel, Sender};
 
 use tokio_stream::wrappers::BroadcastStream;
-use frontend::index;
+use frontend::{index, styles};
 use websocket::{post_score, handle_stream, PlayerScore, get_scores};
 mod frontend;
 mod websocket;
@@ -26,6 +26,7 @@ async fn axum(
 
     let router = Router::new()
         .route("/", get(index))
+        .route("/styles.css", get(styles))
         .route("/submit", post(post_score))
        	.route("/ws", get(handle_stream))
 	.route("/scores", get(get_scores))
