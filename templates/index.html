@@ -6,13 +6,30 @@
 </div>
 
 <script>
-try {
-const websocket = new WebSocket("ws://localhost:8000/ws");
+async function fetchScoresJSON() {
+	let host = window.location.protocol !== 'https:' ? 'http://localhost:8000' : 'https://shuttlegame-leaderboard.shuttleapp.rs';
 
-websocket.onmessage = (event) => {
+	const response = await fetch( host + "/scores");
+	const data = response.json();
+	return data;
+}
+
+fetchScoresJSON()
+	.then(response => {
+if (response.length > 0) {
+	redrawScores(response);
+	}
+})
+
+try {
+const eventsource = new EventSource("//localhost:8000/ws");
+
+eventsource.onmessage = (event) => {
   let event_data = JSON.parse(event.data);
   console.log("Received some data: ", event_data);
-  redrawScores(event_data);
+ if  (event_data.length > 0) {
+	 redrawScores(event_data);
+	}
 };
 } catch(e) {
 	console.log(e.message)

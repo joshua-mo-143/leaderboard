@@ -6,11 +6,14 @@ edition = "2021"
 [dependencies]
 axum = { version = "0.6.18", features = ["macros", "ws"] }
 futures = "0.3.28"
+futures-util = { version = "0.3.28", features = ["tokio-io"] }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.107"
-shuttle-axum = "0.26.0"
-shuttle-runtime = "0.26.0"
-shuttle-static-folder = "0.26.0"
+shuttle-axum = "0.27.0"
+shuttle-persist = "0.27.0"
+shuttle-runtime = "0.27.0"
+shuttle-secrets = "0.27.0"
+shuttle-static-folder = "0.27.0"
 tera = "1.19.1"
 tokio = "1.28.2"
 tokio-stream = { version = "0.1.14", features = ["sync"] }
