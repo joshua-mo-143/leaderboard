@@ -21,13 +21,10 @@ pub struct PlayerScore {
 
 pub async fn get_scores(
     Extension(persist): Extension<PersistInstance>,	
-) -> Result<impl IntoResponse, StatusCode> {
+) -> impl IntoResponse {
     let scores = load_persist(persist);
 
-    if  scores.len() == 0  {
-	return Err(StatusCode::NO_CONTENT)
-}
-    Ok((StatusCode::OK, Json(scores)))
+    (StatusCode::OK, Json(scores))
 }
 
 pub async fn post_score(
@@ -73,9 +70,6 @@ persist.load::<Vec<PlayerScore>>("scores").unwrap()
 		Vec::new()
 };
 
-        if scores.len() == 10 {
-            scores.pop();
-        }
         scores.push(submission.clone());
         scores.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap());
 	
@@ -86,7 +80,7 @@ persist.load::<Vec<PlayerScore>>("scores").unwrap()
 	Ok(scores)
 }
 
-fn load_persist(persist: PersistInstance) -> Vec<PlayerScore> {
+pub fn load_persist(persist: PersistInstance) -> Vec<PlayerScore> {
 
  if persist.load::<Vec<PlayerScore>>("scores").is_ok() {
 persist.load::<Vec<PlayerScore>>("scores").unwrap()

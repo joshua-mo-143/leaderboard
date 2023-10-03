@@ -28,7 +28,7 @@ async fn axum(
         .route("/", get(index))
         .route("/styles.css", get(styles))
         .route("/submit", post(post_score))
-       	.route("/ws", get(handle_stream))
+       	.route("/stream", get(handle_stream))
 	.route("/scores", get(get_scores))
         .layer(Extension(tx))
 	.layer(Extension(persist))

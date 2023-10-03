@@ -3,9 +3,19 @@
 <div class="page-wrapper"> 
 	<h1>Shuttle Invaders Leaderboard</h1>
 	<div id="playerscores-container">
-		<p>Loading...</p>
-	</div>
-	<div>
+
+		{% for score in scores %}
+		<div class="playerscore-container">
+		{{loop.index + offset  }}. {{ score.score }} - {{ score.name }}
+		</div>
+		{% endfor %}
+	</div> 
+		<div class="pagination-container">
+		Pages
+		{% for page in range(end=pages) %}
+			<a href="/?page={{page + 1}}">{{page + 1}}</a>
+		{% endfor %}
+		</div>	
 		<h2> Information </h2>
 	<p> Shuttle Invaders is a game where you get to play as a spaceship and shoot unwraps and errors away.</p>
 	
@@ -16,29 +26,20 @@
 </div>
 
 <script>
-async function fetchScoresJSON() {
-	let host = window.location.protocol !== 'https:' ? 'http://localhost:8000' : 'https://shuttlegame-leaderboard.shuttleapp.rs';
-
-	const response = await fetch( host + "/scores");
-	const data = response.json();
-	return data;
-}
-
-fetchScoresJSON()
-	.then(response => {
-if (response.length > 0) {
-	redrawScores(response);
-	}
-})
+const host = window.location.protocol !== 'https:' ? 'http://localhost:8000' : 'https://shuttlegame-leaderboard.shuttleapp.rs';
+const urlParams = new URLSearchParams(window.location.search);
+const page = urlParams.get("page");
+const offset = (page - 1) * 10;
 
 try {
-const eventsource = new EventSource("//localhost:8000/ws");
+const eventsource = new EventSource(host + "/stream");
 
 eventsource.onmessage = (event) => {
-  let event_data = JSON.parse(event.data);
+  const event_data = JSON.parse(event.data);
   console.log("Received some data: ", event_data);
  if  (event_data.length > 0) {
-	 redrawScores(event_data);
+	const data = event_data.filter((x, i) => i >= offset && i < offset + 10);
+	 redrawScores(data);
 	}
 };
 } catch(e) {
@@ -49,7 +50,7 @@ function redrawScores(array) {
 	let elems = array.map((x, i) => {
 	let meme = document.createElement("div");
 	meme.classList.toggle("playerscore-container");
-	meme.innerText = (i + 1) + ". " + x.score + " - " + x.name;
+	meme.innerText = (i + 1 + offset) + ". " + x.score + " - " + x.name;
 	
 	return meme
 	});
